@@ -66,7 +66,7 @@
       </el-form-item>
 
      <el-form-item>
-        <el-button type="primary" @click="handleSetRemoteRepo()">submit</el-button>
+        <el-button type="primary" @click="handleStartPush()">start</el-button>
             <el-button @click="handleStopPush()">stop</el-button>
      </el-form-item>
     </el-form>
@@ -86,7 +86,7 @@ export default {
     data() {
       return {
         genSshKey: false,
-        sshkey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDIv8Rb7iu5olVOD/5n9LvPcJsQsHn56dtmkVj75Obo2dEUbZAyYUwN+V1MP8WV6SubgE+P2TPBOFW02YhJZ3NlF1T2vPSPofkrunM/QWVNIEIIr5AMRnK8JqQjmTWY34soVZJtD6ERvLa6CY1uB954v+CQoJJcqRzWkvtbxB7TFQ== %",
+        sshkey: "",
         remoteRepoUrl: null,
         oldPassword : null,
         newPassword : null,
@@ -99,6 +99,20 @@ export default {
       };
     },
     methods: {
+      handleStartPush(){
+        let url = global.HOST_URL + "/admin/push";
+            axios.post(url, null, this.config).then(res => {
+              res = res.data;
+              if(res.code === 0){
+              this.$message({
+              type: 'success',
+              message: 'Start push to remote successfully',
+              duration: 1000
+            });
+              }
+            }
+          )
+      },
       handleStopPush(){
           let url = global.HOST_URL + "/admin/push";
             axios.delete(url, this.config).then(res => {
