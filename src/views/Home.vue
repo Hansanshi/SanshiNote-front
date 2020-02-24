@@ -414,9 +414,11 @@ export default {
         content: this.chosenNote.content,
         createMode: this.isCreateMode
       }
-      let url = global.HOST_URL + "/note/" + this.chosenNote.notebookName + "/" + this.chosenNote.title;
+      let url ;
       if(this.isCreateMode){
           url = global.HOST_URL + "/note/" + this.newNote.notebookName + "/" + this.newNote.title;
+      }else{
+        url = global.HOST_URL + "/note/" + this.chosenNote.notebookName + "/" + this.chosenNote.title;
       }
       axios.post(url, request, this.config).then(res => {
         res = res.data;
@@ -701,8 +703,78 @@ refreshNotebookList(){
       this.$store.commit('setLocalInfo', {});
       setTimeout(()=>{this.$router.push('/login');},500);
     },
+doInit(){
+        this.refreshNotebookList();
+        this.checkUnsavedNote();
+        // todo 将时间改为5min，与后台保持一致
+        this.timer = setInterval(() => {
+          this.checkPushStatus();
+          this.autoSaveDraftNote();
+        }, 1 * 60 * 1000);
+},
+checkUnsavedNote(){
+      let url = global.HOST_URL + "/draftNote" ;
+      axios.get(url, this.config).then(
+        res => {
+            res = res.data;
+            if(res.code === 0){
+              let draftNoteList = res.data;
+              if(draftNoteList.length > 0){
+                this.alertUnsavedDraftNote(draftNoteList);
+              }
+            }
+        }
+      )
 
-    validateUser(){
+},
+alertUnsavedDraftNote(draftNoteList){
+        let draftNote = draftNoteList[0];
+      
+        this.$confirm("There is unsaved note: " + draftNote.notebookName + "/" + draftNote.title + ",  " + draftNote.updateTime,
+         'Notice', {
+          confirmButtonText: 'confirm',
+          cancelButtonText: 'cancel',
+          type: 'warning'
+        }).then(() => {
+          let request = {
+            content: draftNote.content,
+          }
+          let url = global.HOST_URL + "/note/" + draftNote.notebookName + "/" + draftNote.title;
+          axios.post(url, request, this.config).then(
+            res => {
+              res = res.data;
+              if(res.code === 0){
+                this.refreshNotebookList();
+              }
+            }
+          )
+      
+        }).catch(() => {
+          // this.deleteDraftNote(draftNote.notebookName, draftNote.title);
+          this.deleteAllDraftNotes();
+          }
+        );
+      }
+,
+deleteDraftNote(notebookName, title){
+    let url = global.HOST_URL + "/draftNote/" + notebookName + "/" + title;
+    axios.delete(url, this.config);
+},
+deleteAllDraftNotes(){
+    let url = global.HOST_URL + "/draftNote";
+    axios.delete(url, this.config);
+},
+autoSaveDraftNote(){
+  if(this.isContentUnModified){
+    return ;
+  }
+  let url = global.HOST_URL + "/draftNote/" + this.chosenNote.notebookName + "/" + this.chosenNote.title;
+  let param = {
+    content : this.chosenNote.content
+  }
+  axios.post(url, param, this.config);
+},
+  validateUser(){
       let url = global.HOST_URL + "/user/validate";
     axios.post(url, null, this.config).then(
       res => {
@@ -710,11 +782,7 @@ refreshNotebookList(){
         if(res.code !== 0){
             this.clearInfoAndPushToLogin();
         }else{
-            this.refreshNotebookList();
-            // todo 将时间改为5min，与后台保持一致
-            this.timer = setInterval(() => {
-              this.checkPushStatus();
-            }, 10 * 1000);
+            this.doInit();
         }
       }
     )
