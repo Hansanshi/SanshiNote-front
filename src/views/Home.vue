@@ -379,6 +379,29 @@ export default {
     handleSave(succCallback,arg1, arg2){
       // TODo 校验空值得情况
 
+if(this.isCreateMode){
+        if(!this.newNote.notebookName 
+            || !this.newNote.title
+            || this.newNote.notebookName === ""
+            || this.newNote.title === ""){
+            this.$message({
+              type: 'warning',
+              message: "Notebook or title can't be null"
+            });
+          return ;
+        }
+      }else{
+        if(!this.chosenNote.notebookName 
+            || !this.chosenNote.title
+            || this.chosenNote.notebookName === ""
+            || this.chosenNote.title === ""){
+            this.$message({
+              type: 'warning',
+              message: "Notebook or title can't be null"
+            });
+          return ;
+        }
+      }
       // 如果是创建笔记模式，或者说标题没有改变，那么仅保存内容
       if(this.createMode || this.isTitleUnModified){
         this.handleSaveContent(succCallback, arg1, arg2);
@@ -768,7 +791,18 @@ autoSaveDraftNote(){
   if(this.isContentUnModified){
     return ;
   }
-  let url = global.HOST_URL + "/draftNote/" + this.chosenNote.notebookName + "/" + this.chosenNote.title;
+  let url ;
+  if(this.isCreateMode){
+      url = global.HOST_URL + "/draftNote/" + this.newNote.notebookName + "/" + this.newNote.title;
+      if(!this.newNote.notebookName || !this.newNote.title){
+        return ;
+      }
+  }else{
+      url = global.HOST_URL + "/draftNote/" + this.chosenNote.notebookName + "/" + this.chosenNote.title;
+      if(!this.chosenNote.notebookName || !this.chosenNote.title){
+        return ;
+      }
+  }
   let param = {
     content : this.chosenNote.content
   }

@@ -1,4 +1,4 @@
-const HOST_URL = 'http://127.0.0.1:8080/api'
+const HOST_URL = '/api'
 
 export default{
     HOST_URL
