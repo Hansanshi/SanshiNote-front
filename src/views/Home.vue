@@ -145,7 +145,7 @@
   <!-- NOTE HEADER END -->
 
     <!-- EDITOR START -->
-    <mavon-editor :boxShadow="false" language="en" 
+    <mavon-editor id="editor" :boxShadow="false" language="en" 
       ref="editor"
       codeStyle="androidstudio" 
       v-model="chosenNote.content" 
@@ -866,6 +866,9 @@ autoSaveDraftNote(){
 #hanshi-note{
   padding-right: 22px;
   font-size: 30px;
+}
+#editor img{
+  max-width: 800px;
 }
 .my-el-input__icon {
   padding-top: 12px;
